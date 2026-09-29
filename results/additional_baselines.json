@@ -1,0 +1,10 @@
+{
+  "minicheck": {
+    "spearman": 0.38018281235415724,
+    "n": 1600
+  },
+  "claude_judge": {
+    "spearman": NaN,
+    "n": 200
+  }
+}

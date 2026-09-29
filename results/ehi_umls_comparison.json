@@ -1,0 +1,8 @@
+{
+  "n": 50,
+  "domain": "medical",
+  "plain_mean": 0.5016178412803142,
+  "enhanced_mean": 0.5090509773835101,
+  "improvement_mean": 0.0074331361031959985,
+  "pct_improved": 0.88
+}

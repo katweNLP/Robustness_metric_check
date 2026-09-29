@@ -1,0 +1,60 @@
+{
+  "metrics": {
+    "EHI": {
+      "mean_ms": 48.75,
+      "std_ms": 0.96,
+      "median_ms": 48.93,
+      "min_ms": 46.5,
+      "max_ms": 49.95,
+      "category": "lightweight",
+      "n_runs": 10
+    },
+    "RHI*": {
+      "mean_ms": 135.63,
+      "std_ms": 10.94,
+      "median_ms": 136.41,
+      "min_ms": 110.73,
+      "max_ms": 152.86,
+      "category": "moderate",
+      "n_runs": 10
+    },
+    "QHI": {
+      "mean_ms": 66.45,
+      "std_ms": 7.27,
+      "median_ms": 64.29,
+      "min_ms": 55.95,
+      "max_ms": 77.78,
+      "category": "lightweight",
+      "n_runs": 10
+    },
+    "CHI (full)": {
+      "mean_ms": 464.18,
+      "std_ms": 63.49,
+      "median_ms": 479.91,
+      "min_ms": 354.01,
+      "max_ms": 542.37,
+      "category": "moderate",
+      "n_runs": 10
+    },
+    "ROUGE-L": {
+      "mean_ms": 1.75,
+      "std_ms": 0.72,
+      "median_ms": 1.55,
+      "min_ms": 0.93,
+      "max_ms": 3.8,
+      "category": "lightweight",
+      "n_runs": 10
+    },
+    "BERTScore": {
+      "mean_ms": 3495.05,
+      "std_ms": 318.61,
+      "median_ms": 3423.31,
+      "min_ms": 3242.02,
+      "max_ms": 4385.0,
+      "category": "heavyweight",
+      "n_runs": 10
+    }
+  },
+  "n_samples_available": 50,
+  "n_runs": 10
+}

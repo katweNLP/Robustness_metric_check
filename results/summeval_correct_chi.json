@@ -1,0 +1,22 @@
+{
+  "CHI (full)": {
+    "spearman": -0.0116,
+    "kendall": -0.0098
+  },
+  "EHI": {
+    "spearman": 0.0401,
+    "kendall": 0.031
+  },
+  "RHI*": {
+    "spearman": 0.0381,
+    "kendall": 0.0293
+  },
+  "QHI": {
+    "spearman": -0.0203,
+    "kendall": -0.0164
+  },
+  "ROUGE-L": {
+    "spearman": 0.0013,
+    "kendall": -0.001
+  }
+}

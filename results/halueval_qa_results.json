@@ -1,0 +1,58 @@
+{
+  "task": "HaluEval QA \u2014 Non-Summarization Transfer",
+  "n_samples": 500,
+  "n_hallucinated": 252,
+  "n_faithful": 248,
+  "extraction_statistics": {
+    "median_entities_per_answer": 1.0,
+    "mean_entities_per_answer": 1.6,
+    "median_triples_per_answer": 0.0,
+    "mean_triples_per_answer": 1.36,
+    "pct_answers_with_entities": 87.0,
+    "pct_answers_with_triples": 39.0
+  },
+  "results": {
+    "CHI": {
+      "roc_auc": 0.13102438556067583,
+      "balanced_acc": 0.5,
+      "point_biserial": 0.6496309922269934,
+      "spearman": 0.6400520952124126,
+      "n": 500
+    },
+    "EHI": {
+      "roc_auc": 0.4038738479262673,
+      "balanced_acc": 0.5121607782898105,
+      "point_biserial": 0.23183447357778447,
+      "spearman": 0.16696969891528982,
+      "n": 500
+    },
+    "RHI*": {
+      "roc_auc": 0.14163306451612903,
+      "balanced_acc": 0.5,
+      "point_biserial": 0.7395465625331465,
+      "spearman": 0.720213676104209,
+      "n": 500
+    },
+    "QHI": {
+      "roc_auc": 0.467917946748592,
+      "balanced_acc": 0.5,
+      "point_biserial": 0.08923426110185435,
+      "spearman": 0.0818735969458209,
+      "n": 500
+    },
+    "ROUGE-L": {
+      "roc_auc": 0.5,
+      "balanced_acc": 0.5,
+      "point_biserial": NaN,
+      "spearman": NaN,
+      "n": 500
+    },
+    "BERTScore": {
+      "roc_auc": 0.4959837429595495,
+      "balanced_acc": 0.5661162314388121,
+      "point_biserial": -0.007324858367156526,
+      "spearman": 0.007293186987558042,
+      "n": 500
+    }
+  }
+}

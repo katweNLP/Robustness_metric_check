@@ -1,0 +1,50 @@
+{
+  "ROUGE-L": {
+    "spearman": 0.1385,
+    "kendall": 0.1091,
+    "p": 2.647331730138803e-08,
+    "type": "Lexical"
+  },
+  "Entity F1": {
+    "spearman": 0.0987,
+    "kendall": 0.0779,
+    "p": 7.610203143183203e-05,
+    "type": "Entity overlap"
+  },
+  "BERTScore": {
+    "spearman": 0.0967,
+    "kendall": 0.076,
+    "p": 0.0001063995880529235,
+    "type": "Semantic"
+  },
+  "CHI (ours)": {
+    "spearman": 0.0837,
+    "kendall": 0.0658,
+    "p": 0.0008096035778720812,
+    "type": "Composite"
+  },
+  "QHI (ours)": {
+    "spearman": 0.0798,
+    "kendall": 0.0642,
+    "p": 0.0014096554572990195,
+    "type": "Quantity-level"
+  },
+  "EHI (ours)": {
+    "spearman": 0.0584,
+    "kendall": 0.0456,
+    "p": 0.019554216494713575,
+    "type": "Entity-level"
+  },
+  "SummaC": {
+    "spearman": -0.0896,
+    "kendall": -0.0704,
+    "p": 0.0003321504729321084,
+    "type": "NLI-faithfulness"
+  },
+  "AlignScore": {
+    "spearman": -0.1601,
+    "kendall": -0.1262,
+    "p": 1.1809601514329825e-10,
+    "type": "NLI-faithfulness"
+  }
+}

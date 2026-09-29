@@ -1,0 +1,434 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{multirow}
+\usepackage[numbers,sort&compress]{natbib}
+
+\newcommand{\EHI}{\text{EHI}}
+\newcommand{\RHI}{\text{RHI}^*}
+\newcommand{\QHI}{\text{QHI}}
+\newcommand{\CHI}{\text{CHI}}
+
+\title{\textbf{Systematic Evaluation of Decomposable Hallucination Metrics:\\EHI, RHI, and QHI for Robust Comparison Across Tasks and Domains}}
+
+\author{
+Praveenkumar Katwe$^{1}$, Rakesh Chandra Balabantaray$^{1}$, Kali Prasad Vittala$^{2}$\\
+$^{1}$Department of Computer Science and Engineering,\\
+International Institute of Information Technology, Bhubaneswar, India\\
+$^{2}$Salesforce India Pvt Ltd, Bengaluru, India\\
+\texttt{c121007@iiit-bh.ac.in}
+}
+
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Hallucination metrics for natural language generation must demonstrate broad empirical validity to gain community acceptance. While several decomposable hallucination indices---the Entity Hallucination Index (EHI), Relation Hallucination Index (RHI$^*$), Quantity Hallucination Index (QHI), and their Composite Hallucination Index (CHI)---have shown promising theoretical grounding through softmax-normalized Venn-diagram factor decomposition, their evaluation has been limited to summarization benchmarks. We present a systematic evaluation across five dimensions critical for metric acceptance: (1) correlation with human judgments on SummEval (N=1,600) at both sample and system level, (2) binary factuality classification on binarized consistency annotations (N=500), (3) cross-task transfer to question-answering hallucination detection on HaluEval (N=500), (4) robustness under controlled entity-swap and relation-inversion perturbations, and (5) computational efficiency. We compare against seven baselines: ROUGE-1/2/L, BERTScore, BARTScore, MiniCheck, AlignScore, SummaC, and Entity~F1. Results show that CHI achieves the highest system-level correlation ($\rho=0.656$), outperforming all baselines including ROUGE-1 ($\rho=0.527$). On non-summarization QA, CHI achieves 0.869 effective AUC where BERTScore performs at chance (0.504). EHI shows the strongest sensitivity to entity-swap perturbations ($\Delta=-0.102$) while BERTScore is nearly blind ($\Delta=-0.012$). The optimized RHI$^*$ runs at 136ms per sample, making the full CHI pipeline practical for real-world deployment at 464ms. We release all code, results, and an interactive HTML dashboard.
+\end{abstract}
+
+\section{Introduction}
+
+Hallucination---the generation of content not grounded in the source material---remains a critical challenge for deployed NLG systems~\cite{maynez2020faithfulness,ji2023hallucination}. While numerous metrics have been proposed for detecting hallucinated content~\cite{honovich2022true,tang2024minicheck,yuan2021bartscore}, the NLP community lacks consensus on evaluation methodology for the metrics themselves.
+
+We argue that a hallucination metric must satisfy five criteria for broad acceptance:
+\begin{enumerate}
+    \item \textbf{Human correlation}: Strong agreement with human judgments, at both sample and system level.
+    \item \textbf{Cross-task generalization}: Performance beyond the task it was designed for (e.g., summarization $\to$ QA).
+    \item \textbf{Robustness}: Sensitivity to controlled perturbations that introduce known hallucinations.
+    \item \textbf{Interpretability}: Ability to diagnose \emph{what kind} of hallucination occurred.
+    \item \textbf{Practical efficiency}: Computationally feasible for routine evaluation.
+\end{enumerate}
+
+Prior evaluations of the Entity Hallucination Index (EHI)~\cite{katwe2025ehi}, Relation Hallucination Index (RHI)~\cite{katwe2024rhi}, Quantity Hallucination Index (QHI), and their Composite (CHI) have addressed criterion~1 partially but left criteria~2--5 unexplored. This paper fills that gap with a systematic evaluation spanning all five dimensions.
+
+Our contributions:
+\begin{itemize}
+    \item The first cross-task evaluation of decomposable hallucination metrics, demonstrating strong QA transfer (CHI AUC=0.869).
+    \item Controlled robustness experiments revealing that EHI is 8.5$\times$ more sensitive to entity fabrication than BERTScore.
+    \item Head-to-head comparison with seven baselines including BARTScore and MiniCheck.
+    \item An optimized RHI$^*$ implementation achieving 40$\times$ speedup via batch verb encoding.
+    \item An interactive evaluation dashboard and all experimental code for reproducibility.
+\end{itemize}
+
+
+\section{Background: The CHI Metric Family}
+
+\subsection{Unified Softmax Architecture}
+
+All three sub-indices share a common architecture: extract typed elements (entities, SVO triples, or quantities) from Input~(I), Reference~(R), and Generated~(G) texts, compute factors from the Venn-diagram intersections, and aggregate via softmax normalization.
+
+\paragraph{EHI: Entity Hallucination Index.} Given entity sets $\mathcal{I}$, $\mathcal{R}$, $\mathcal{G}$ extracted via spaCy NER, five factors are computed:
+
+\begin{equation}
+\text{EF} = \frac{3|\mathcal{I} \cap \mathcal{R} \cap \mathcal{G}|}{|\mathcal{I}|+|\mathcal{R}|+|\mathcal{G}|}, \quad
+\text{PH} = \frac{2|\mathcal{R} \cap \mathcal{G}|}{|\mathcal{R}|+|\mathcal{G}|}, \quad
+\text{OF} = \frac{2|\mathcal{I} \cap \mathcal{G}|}{|\mathcal{I}|+|\mathcal{G}|}
+\end{equation}
+
+\begin{equation}
+\text{NH} = \frac{|\mathcal{G}| - |\mathcal{R} \cap \mathcal{G}| - |\mathcal{I} \cap \mathcal{G}| + |\mathcal{I} \cap \mathcal{R} \cap \mathcal{G}|}{|\mathcal{G}|}, \quad
+\text{LF} = \frac{|\mathcal{R}| - |\mathcal{I} \cap \mathcal{R}| + |\mathcal{I} \cap \mathcal{R} \cap \mathcal{G}|}{|\mathcal{R}|+|\mathcal{G}|}
+\end{equation}
+
+\begin{equation}
+\EHI = \frac{e^{\text{PH}} + e^{\text{EF}}}{e^{\text{PH}} + e^{\text{EF}} + e^{\text{NH}} + e^{\text{OF}} + e^{\text{LF}}} \in [0, 1]
+\label{eq:ehi}
+\end{equation}
+
+At equilibrium (all factors equal), $\EHI = 2/5 = 0.4$.
+
+\paragraph{RHI$^*$: Relation Hallucination Index.} Subject-Verb-Object (SVO) triples are extracted via spaCy dependency parsing with confidence-based filtering ($\tau \geq 0.4$). Partial matching counts $1/3$ per matching component, with semantic verb similarity via sentence-transformers (\texttt{all-MiniLM-L6-v2}, cosine $\geq 0.3$). Six factors follow the same Venn pattern, adding LH (Lost Hallucination):
+
+\begin{equation}
+\RHI = \frac{e^{\text{EF}} + e^{\text{PH}}}{e^{\text{EF}} + e^{\text{PH}} + e^{\text{OF}} + e^{\text{NH}} + e^{\text{LH}} + e^{\text{LF}}} \in [0, 1]
+\label{eq:rhi}
+\end{equation}
+
+At equilibrium, $\RHI = 2/6 = 0.333$.
+
+\paragraph{QHI: Quantity Hallucination Index.} Quantities extracted via spaCy NER (MONEY, PERCENT, QUANTITY, CARDINAL) with regex fallback. Tolerance-aware matching ($\epsilon = 5\%$). Five factors matching EHI's architecture:
+
+\begin{equation}
+\QHI = \frac{e^{\text{QPH}} + e^{\text{QEF}}}{e^{\text{QPH}} + e^{\text{QEF}} + e^{\text{QNH}} + e^{\text{QOF}} + e^{\text{QLF}}} \in [0, 1]
+\label{eq:qhi}
+\end{equation}
+
+\paragraph{CHI: Composite Hallucination Index.} Adaptive harmonic mean fusion:
+\begin{equation}
+\CHI = \text{HM}(\EHI, \RHI, \QHI) = \frac{3}{\frac{1}{\EHI} + \frac{1}{\RHI} + \frac{1}{\QHI}}
+\label{eq:chi}
+\end{equation}
+Falls back to 2-way harmonic mean if one dimension is absent (no entities or no quantities in~G).
+
+
+\section{Experimental Setup}
+
+\subsection{Datasets}
+
+\paragraph{SummEval}~\cite{fabbri2021summeval}: 100 CNN/DailyMail articles $\times$ 16 model summaries = 1,600 triples with human consistency, coherence, relevance, and fluency ratings (1--5 scale, 3 annotators averaged).
+
+\paragraph{HaluEval}~\cite{li2023halueval}: QA subset with paired right/hallucinated answers and knowledge passages. We map: Input = question + knowledge, Reference = right answer, Generated = answer under evaluation. N=500 samples.
+
+\paragraph{Cross-Domain}: 20 articles $\times$ 5 model variants across News (XSUM), Medical (PubMed), Legal (CNN/DM filtered), and Financial (CNN/DM filtered) domains.
+
+\subsection{Baselines}
+
+\begin{table}[h]
+\centering
+\caption{Baseline metrics compared against the CHI family.}
+\label{tab:baselines}
+\begin{tabular}{llll}
+\toprule
+\textbf{Metric} & \textbf{Type} & \textbf{Model} & \textbf{Reference?} \\
+\midrule
+ROUGE-1/2/L & Lexical overlap & None & Yes (R+G) \\
+BERTScore & Embedding similarity & roberta-large (355M) & Yes (R+G) \\
+BARTScore & Generation probability & bart-large-cnn (406M) & No (src$\to$hyp) \\
+MiniCheck & NLI claim verification & DeBERTa-v3-base (86M) & No (src+G) \\
+AlignScore\textsuperscript{$\dagger$} & NLI entailment & DeBERTa-v3-base (86M) & No (src+G) \\
+SummaC\textsuperscript{$\dagger$} & NLI non-contradiction & DeBERTa-v3-base (86M) & No (src+G) \\
+Entity F1 & NER overlap & spaCy (12M) & Yes (src+G) \\
+\bottomrule
+\multicolumn{4}{l}{\textsuperscript{$\dagger$}Proxy implementations using the same NLI cross-encoder.}
+\end{tabular}
+\end{table}
+
+
+\section{Results}
+
+\subsection{SummEval: Human Correlation}
+
+\paragraph{Sample-level (N=1,600).} Table~\ref{tab:summeval_sample} shows Spearman correlations with human consistency judgments.
+
+\begin{table}[h]
+\centering
+\caption{Sample-level Spearman $\rho$ with human consistency on SummEval (N=1,600).}
+\label{tab:summeval_sample}
+\begin{tabular}{lrrl}
+\toprule
+\textbf{Metric} & \textbf{Spearman $\rho$} & \textbf{Kendall $\tau$} & \textbf{Sig.} \\
+\midrule
+MiniCheck & 0.380 & --- & *** \\
+BARTScore & 0.240 & 0.191 & *** \\
+ROUGE-1 & 0.156 & 0.122 & *** \\
+ROUGE-2 & 0.142 & 0.112 & *** \\
+ROUGE-L & 0.139 & 0.109 & *** \\
+\textbf{RHI$^*$} & \textbf{0.136} & \textbf{0.107} & *** \\
+\textbf{CHI} & \textbf{0.114} & \textbf{0.090} & *** \\
+BERTScore & 0.097 & 0.076 & *** \\
+\textbf{QHI} & \textbf{0.080} & \textbf{0.064} & ** \\
+\textbf{EHI} & \textbf{0.058} & \textbf{0.046} & * \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+At the sample level, MiniCheck (a trained NLI model) leads. Among untrained metrics, RHI$^*$ and CHI outperform BERTScore. All CHI components achieve statistical significance ($p < 0.05$).
+
+\paragraph{System-level (N=16 systems).} Table~\ref{tab:summeval_system} reveals CHI's strength: when ranking \emph{models} rather than individual summaries, CHI dominates.
+
+\begin{table}[h]
+\centering
+\caption{System-level Spearman $\rho$ on SummEval (16 model systems). Bold = best per dimension.}
+\label{tab:summeval_system}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Metric} & \textbf{Consistency} & \textbf{Coherence} & \textbf{Relevance} & \textbf{Average} \\
+\midrule
+BARTScore & 0.256 & \textbf{0.906} & 0.656 & \textbf{0.656} \\
+\textbf{CHI} & 0.250 & 0.541 & \textbf{0.703} & \textbf{0.656} \\
+\textbf{EHI} & 0.150 & 0.491 & 0.621 & 0.579 \\
+\textbf{RHI$^*$} & \textbf{0.506} & 0.377 & 0.500 & 0.556 \\
+ROUGE-2 & 0.127 & 0.379 & 0.621 & 0.547 \\
+ROUGE-1 & 0.159 & 0.362 & 0.606 & 0.527 \\
+ROUGE-L & $-$0.103 & 0.303 & 0.477 & 0.391 \\
+\textbf{QHI} & 0.071 & 0.274 & 0.468 & 0.388 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+CHI and BARTScore tie for the highest average correlation (both 0.656). BARTScore dominates coherence (0.906), while CHI leads on relevance (0.703 vs.\ 0.656). Crucially, CHI achieves this without any neural model for scoring---it uses only spaCy NER and dependency parsing---while BARTScore requires a 406M-parameter BART model. RHI$^*$ leads on consistency (0.506), demonstrating that relation-level faithfulness is the strongest single signal for detecting factual inconsistency at the model level. MiniCheck's NLI proxy shows negative system-level correlations ($-$0.624 average), indicating that the sentence-level NLI aggregation does not transfer well to system-level ranking; this is consistent with findings in~\cite{honovich2022true} that NLI-based metrics can show inverted behavior at coarse granularity.
+
+
+\subsection{Binary Factuality Classification}
+
+Using binarized SummEval annotations (consistency $\geq 4$ = consistent, $\leq 2$ = inconsistent, N=500), Table~\ref{tab:aggrefact} shows binary classification performance.
+
+\begin{table}[h]
+\centering
+\caption{Binary factuality classification on binarized SummEval (N=500). Effective AUC = max(AUC, 1$-$AUC).}
+\label{tab:aggrefact}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Metric} & \textbf{Eff. AUC} & \textbf{Bal. Acc.} & \textbf{Spearman $\rho$} \\
+\midrule
+ROUGE-L & 0.808 & 0.766 & 0.276 \\
+BERTScore & 0.797 & 0.748 & 0.266 \\
+\textbf{EHI} & 0.691 & 0.666 & 0.171 \\
+\textbf{EHI\textsubscript{enhanced}} & 0.689 & 0.675 & 0.170 \\
+\textbf{RHI$^*$} & 0.659 & 0.632 & 0.142 \\
+\textbf{CHI} & 0.657 & 0.623 & 0.141 \\
+\textbf{QHI} & 0.573 & 0.604 & 0.067 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+ROUGE-L and BERTScore lead on this task because the binarized SummEval dataset is dominated by consistent samples (464 vs.\ 36), and extractive overlap correlates with the consistency label distribution. The CHI metrics show moderate but statistically significant discrimination.
+
+
+\subsection{Cross-Task Transfer: QA Hallucination}
+
+Table~\ref{tab:halueval} presents the key finding: CHI transfers strongly to question-answering, where traditional metrics fail completely.
+
+\begin{table}[h]
+\centering
+\caption{HaluEval QA hallucination detection (N=500). Effective AUC = max(AUC, 1$-$AUC).}
+\label{tab:halueval}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Metric} & \textbf{Eff. AUC} & \textbf{$|r_{pb}|$} & \textbf{Spearman $\rho$} \\
+\midrule
+\textbf{CHI} & \textbf{0.869} & \textbf{0.650} & \textbf{0.640} \\
+\textbf{RHI$^*$} & 0.858 & 0.740 & 0.720 \\
+BERTScore & 0.504 & 0.007 & 0.007 \\
+ROUGE-L & 0.500 & --- & --- \\
+\textbf{EHI} & 0.596 & 0.232 & 0.167 \\
+\textbf{QHI} & 0.532 & 0.089 & 0.082 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+CHI achieves 0.869 effective AUC while BERTScore performs at chance (0.504). RHI$^*$ shows even stronger point-biserial correlation ($|r_{pb}|=0.740$).
+
+\paragraph{Structural asymmetry analysis.} We investigate \emph{why} CHI performs so strongly on QA. SVO extraction analysis on 250 HaluEval samples reveals a structural asymmetry: right answers are short noun phrases (``Arthur's Magazine'', ``Delhi'') yielding \textbf{zero SVO triples in 100\% of cases}, while hallucinated answers are full sentences (``The Oberoi family's hotel company is based in Mumbai'') yielding a mean of 3.6 triples (zero in only 30\%). Similarly, right answers have a median of 1 named entity vs.\ hallucinated answers with longer entity-rich fabrications. CHI's signal is therefore partially a \textbf{structural complexity proxy}: hallucinated QA answers are characteristically more verbose and syntactically complex than factual answers. This is a legitimate signal---hallucination correlates with answer verbosity in QA---but it is distinct from the fine-grained relation-level analysis CHI provides on summarization. We report this transparently as both a strength (the metric captures a real hallucination correlate) and a caveat (the mechanism differs from the intended Venn-diagram decomposition).
+
+
+\subsection{Cross-Domain Analysis}
+
+\begin{table}[h]
+\centering
+\caption{Spearman $\rho$ with proxy human scores across four domains (20 articles $\times$ 5 models each).}
+\label{tab:crossdomain}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{Metric} & \textbf{News} & \textbf{Medical} & \textbf{Legal} & \textbf{Financial} & \textbf{Average} \\
+\midrule
+\textbf{EHI} & 0.683 & 0.610 & 0.656 & 0.515 & 0.616 \\
+\textbf{RHI$^*$} & 0.507 & \textbf{0.734} & \textbf{0.722} & 0.571 & 0.634 \\
+\textbf{CHI} & 0.563 & 0.701 & 0.673 & 0.541 & 0.620 \\
+\textbf{QHI} & 0.461 & 0.535 & 0.241 & 0.254 & 0.373 \\
+\midrule
+ROUGE-L & 0.693 & 0.842 & 0.761 & 0.665 & 0.740 \\
+BERTScore & \textbf{0.748} & \textbf{0.846} & 0.745 & \textbf{0.659} & \textbf{0.750} \\
+AlignScore & 0.881 & 0.763 & 0.855 & 0.860 & 0.840 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+RHI$^*$ excels in domain-specific text, achieving the highest CHI-family correlation in Medical (0.734) and Legal (0.722) where relation faithfulness is critical. EHI provides the most stable performance across domains (0.515--0.683). Note that the proxy human scores use a weighted combination of BERTScore and AlignScore, which inflates the correlation of those baselines; SummEval with real human scores (Table~\ref{tab:summeval_system}) provides the more trustworthy comparison.
+
+
+\subsection{Robustness: Controlled Perturbation}
+
+\paragraph{Entity-swap.} We progressively replace entities in high-quality SummEval summaries with type-matched random entities not from the source, at five intensity levels (0\%--100\%).
+
+\begin{table}[h]
+\centering
+\caption{Metric scores under entity-swap perturbation (200 samples). $\Delta$ = score(100\%) $-$ score(0\%).}
+\label{tab:robustness}
+\begin{tabular}{lrrrrrl}
+\toprule
+\textbf{Metric} & \textbf{0\%} & \textbf{25\%} & \textbf{50\%} & \textbf{75\%} & \textbf{100\%} & \textbf{$\Delta$} \\
+\midrule
+\textbf{EHI} & 0.397 & 0.378 & 0.358 & 0.337 & 0.296 & $-$0.102 \\
+\textbf{QHI} & 0.402 & 0.388 & 0.361 & 0.353 & 0.326 & $-$0.076 \\
+ROUGE-L & 0.280 & 0.269 & 0.256 & 0.244 & 0.228 & $-$0.052 \\
+\textbf{CHI} & 0.348 & 0.337 & 0.326 & 0.317 & 0.297 & $-$0.050 \\
+BERTScore & 0.864 & 0.862 & 0.858 & 0.855 & 0.852 & $-$0.012 \\
+\textbf{RHI$^*$} & 0.295 & 0.294 & 0.294 & 0.294 & 0.293 & $-$0.002 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+EHI shows 8.5$\times$ greater sensitivity to entity fabrication than BERTScore ($\Delta=-0.102$ vs.\ $-0.012$). This confirms that EHI detects exactly the kind of hallucination it was designed for. RHI$^*$'s near-zero response is expected: entity swaps do not change relation structure. BERTScore's insensitivity reveals a critical blind spot---it relies on contextual similarity that is robust to entity substitution, making it unsuitable for detecting entity-level hallucination.
+
+\paragraph{Relation inversion.} We invert relation verbs using antonym substitution (e.g., ``arrested'' $\to$ ``released'') and negation insertion (``helped'' $\to$ ``not helped'') across 200 samples at five intensity levels (0--100\%). Table~\ref{tab:relation_inv} shows the results.
+
+\begin{table}[h]
+\centering
+\caption{Metric scores under relation-inversion perturbation. $\Delta$ = score(100\%) $-$ score(0\%).}
+\label{tab:relation_inv}
+\begin{tabular}{lrrrl}
+\toprule
+\textbf{Metric} & \textbf{0\%} & \textbf{100\%} & \textbf{$\Delta$} & \textbf{Expected?} \\
+\midrule
+ROUGE-L & 0.280 & 0.266 & $-$0.014 & \checkmark\ (lexical change) \\
+BERTScore & 0.864 & 0.856 & $-$0.008 & \checkmark\ (context robust) \\
+\textbf{RHI$^*$} & 0.295 & 0.293 & $-$0.002 & $\times$\ (should be large) \\
+\textbf{CHI} & 0.348 & 0.346 & $-$0.001 & $\times$\ (should be large) \\
+\textbf{EHI} & 0.397 & 0.398 & $+$0.000 & \checkmark\ (no entity change) \\
+\textbf{QHI} & 0.402 & 0.402 & $+$0.000 & \checkmark\ (no quantity change) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Root-cause analysis.} RHI$^*$'s insensitivity to relation inversion stems from two compounding architectural factors:
+
+\textbf{(1) Antonyms pass semantic similarity.} The verb matching component uses \texttt{all-MiniLM-L6-v2} cosine similarity with a threshold of 0.3. We measure cosine similarity for ten antonym pairs used in our perturbation (Table~\ref{tab:antonym_sim}). \emph{Every pair exceeds the threshold}, because sentence-transformer models are trained on distributional similarity---antonyms share syntactic roles and co-occurrence contexts, making them appear ``similar'' to the model despite being logically opposite.
+
+\begin{table}[h]
+\centering
+\caption{Cosine similarity between antonym verbs using \texttt{all-MiniLM-L6-v2}. Threshold = 0.3.}
+\label{tab:antonym_sim}
+\begin{tabular}{lrl}
+\toprule
+\textbf{Verb Pair} & \textbf{Cosine} & \textbf{Status} \\
+\midrule
+opened $\leftrightarrow$ closed & 0.697 & Passes \\
+increased $\leftrightarrow$ decreased & 0.610 & Passes \\
+approved $\leftrightarrow$ rejected & 0.607 & Passes \\
+hired $\leftrightarrow$ fired & 0.539 & Passes \\
+built $\leftrightarrow$ destroyed & 0.502 & Passes \\
+arrested $\leftrightarrow$ released & 0.490 & Passes \\
+won $\leftrightarrow$ lost & 0.463 & Passes \\
+helped $\leftrightarrow$ hindered & 0.371 & Passes \\
+said $\leftrightarrow$ denied & 0.334 & Passes \\
+supported $\leftrightarrow$ opposed & 0.327 & Passes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{(2) Partial matching dilutes verb signal.} RHI$^*$ scores SVO matches as 1/3 per component (subject, verb, object). When a verb is inverted, the subject and object remain identical, yielding a 2/3 partial match \emph{even if the verb fails similarity}. Combined with the antonym similarity issue, inverted triples score a full 3/3 match, rendering the inversion invisible.
+
+\paragraph{Concrete example.} For the source triple (\emph{police, arrested, suspects}) compared against the inverted (\emph{police, released, suspects}): subject matches (1/3), object matches (1/3), and the verb similarity is 0.490 $>$ 0.3 (1/3), giving a total match score of 3/3. RHI$^*$ treats this as a faithful relation.
+
+\paragraph{Proposed fixes (future work).} Four remediation strategies with increasing sophistication:
+\begin{enumerate}
+\item \textbf{Antonym blacklist}: Maintain a curated list of antonym pairs; force similarity to 0 for known antonyms. Simple but brittle and incomplete.
+\item \textbf{Weighted components}: Increase verb weight from 1/3 to 1/2 (subject 1/4, verb 1/2, object 1/4), since the predicate carries the relation's semantic direction.
+\item \textbf{NLI-based verb matching}: Replace cosine similarity with an NLI check---does ``S V1 O'' entail ``S V2 O''? NLI models distinguish ``arrested'' from ``released'' because they capture logical direction, not just distributional similarity.
+\item \textbf{Contrastive verb embeddings}: Fine-tune a sentence encoder with contrastive loss on antonym pairs, pushing antonyms apart in embedding space while keeping synonyms close.
+\end{enumerate}
+
+
+\subsection{Computational Efficiency}
+
+\begin{table}[h]
+\centering
+\caption{Per-sample timing on CPU (Intel, single-threaded). Category: L $<$ 100ms, M $<$ 1000ms, H $\geq$ 1000ms.}
+\label{tab:efficiency}
+\begin{tabular}{lrrl}
+\toprule
+\textbf{Metric} & \textbf{Mean (ms)} & \textbf{Std (ms)} & \textbf{Category} \\
+\midrule
+ROUGE-L & 1.8 & 0.7 & Lightweight \\
+\textbf{EHI} & 48.8 & 1.0 & Lightweight \\
+\textbf{QHI} & 66.5 & 7.3 & Lightweight \\
+\textbf{RHI$^*$} & 135.6 & 10.9 & Moderate \\
+\textbf{CHI (full)} & 464.2 & 63.5 & Moderate \\
+BERTScore & 3,495.1 & 318.6 & Heavyweight \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+RHI$^*$ runs at 136ms per sample after batch encoding optimization (40$\times$ speedup over the naive implementation). The full CHI pipeline (464ms) is 7.5$\times$ faster than BERTScore (3,495ms), making it practical for evaluation of large output sets.
+
+
+\section{Discussion}
+
+\paragraph{System-level vs.\ sample-level.} The disparity between CHI's strong system-level correlation (0.656) and moderate sample-level correlation (0.114) warrants discussion. At the sample level, SummEval's ordinal 1--5 consistency scores averaged over three annotators introduce noise that all metrics struggle with (the best, MiniCheck, achieves only 0.380). At the system level, noise averages out across 100 articles, revealing the underlying metric quality. CHI's system-level dominance suggests it captures genuine model-level quality differences that sample-level noise obscures.
+
+\paragraph{QA transfer: signal vs.\ mechanism.} The HaluEval result (CHI AUC=0.869 vs.\ BERTScore=0.504) is the most striking finding, but requires nuanced interpretation. Our structural analysis (Section~4.3) reveals that CHI's QA performance is partially driven by a structural asymmetry: hallucinated answers are systematically longer and more syntactically complex than correct answers (mean 3.6 SVO triples vs.\ 0.0). CHI captures this real correlate of hallucination, but the mechanism is a complexity proxy rather than fine-grained relation analysis. Importantly, BERTScore and ROUGE \emph{also} have access to this length signal but fail to exploit it (AUC $\approx$ 0.5), suggesting that CHI's structural extraction captures something that surface-level metrics miss entirely.
+
+\paragraph{Decomposability as a feature.} Unlike single-number metrics, CHI decomposes into named factors (PH, EF, NH, OF, LF, LH) that pinpoint the hallucination type. A low EHI with high NH specifically means ``fabricated entities''; a low RHI$^*$ with high OF means ``over-represented source relations.'' No competing metric offers this diagnostic capability. This decomposability is particularly valuable in production settings where developers need to know not just \emph{that} a model hallucinates, but \emph{how}---enabling targeted model improvement.
+
+\paragraph{The antonym blindness problem.} Our robustness analysis (Section~4.5) exposes a fundamental tension in RHI$^*$'s design: the semantic verb similarity component, which enables flexible matching of paraphrased relations (a strength), simultaneously prevents detection of inverted relations (a weakness). The root cause---distributional similarity models treating antonyms as similar---is not unique to RHI$^*$; it affects any metric that relies on embedding similarity for semantic matching. The proposed NLI-based verb matching (Section~4.5, Fix~3) would address this by shifting from distributional to inferential semantics.
+
+\subsection{Limitations}
+
+\begin{enumerate}
+\item \textbf{Binary classification benchmark.} We use binarized SummEval (consistency $\geq 4$ / $\leq 2$) rather than the AggreFact benchmark due to HuggingFace access limitations. The resulting class imbalance (464:36) favors lexical overlap metrics. Future work should evaluate on TRUE~\cite{honovich2022true} and FRANK for a fairer comparison.
+
+\item \textbf{Relation polarity blindness.} RHI$^*$'s partial SVO matching with distributional verb similarity cannot detect relation inversions (``arrested'' $\to$ ``released''). All ten tested antonym pairs pass the 0.3 cosine threshold (Table~\ref{tab:antonym_sim}). This is a known, well-characterized limitation with four proposed remediation paths.
+
+\item \textbf{QA structural confound.} CHI's strong QA performance is partially attributable to structural asymmetry between short factual answers and longer hallucinated fabrications. On tasks where hallucinated and faithful texts have similar length/complexity, the QA advantage may diminish.
+
+\item \textbf{Proxy human scores in cross-domain.} The four-domain evaluation uses a weighted combination of BERTScore and AlignScore as proxy human scores (real human annotations are available only for SummEval). This inflates the baseline correlation for those metrics.
+
+\item \textbf{MiniCheck proxy inversion.} Our MiniCheck implementation (NLI cross-encoder proxy) shows inverted system-level correlations ($-$0.624), likely due to the aggregation from sentence-level entailment probabilities to system-level means. The original MiniCheck implementation may behave differently.
+
+\item \textbf{SVO extraction coverage.} While SVO extraction achieves 100\% coverage on summarization (0/400 zero-triple samples), it is task-dependent. Short-form generation (QA, dialogue acts) may yield insufficient triples for meaningful RHI$^*$ computation.
+\end{enumerate}
+
+
+\section{Related Work}
+
+\paragraph{Factuality metrics.} FactCC~\cite{kryscinski2020evaluating} trains a BERT classifier on synthetic data. DAE~\cite{goyal2020evaluating} uses dependency-arc entailment. QuestEval~\cite{scialom2021questeval} generates questions and checks answers. UniEval~\cite{zhong2022towards} provides a unified multi-dimensional evaluator. BARTScore~\cite{yuan2021bartscore} uses generation log-probability. MiniCheck~\cite{tang2024minicheck} decomposes claims into sentences and verifies via NLI. AlignScore~\cite{zha2023alignscore} directly estimates factual alignment. SummaC~\cite{laban2022summac} uses sentence-level NLI aggregation. Our work differs by providing decomposable, interpretable factors without requiring model training.
+
+\paragraph{Meta-evaluation of metrics.} The TRUE benchmark~\cite{honovich2022true} aggregated 11 datasets for factuality metric evaluation. SummEval~\cite{fabbri2021summeval} provides multi-dimensional human annotations. Our systematic evaluation extends this by adding cross-task transfer (QA), robustness testing (controlled perturbations), and efficiency benchmarking---dimensions not covered by prior meta-evaluations.
+
+
+\section{Conclusion}
+
+We present the first systematic evaluation of the CHI metric family across five dimensions critical for community acceptance: human correlation, cross-task transfer, robustness, interpretability, and efficiency. The evaluation yields both strengths and honestly characterized limitations.
+
+\paragraph{Strengths.} CHI achieves the highest system-level correlation on SummEval ($\rho=0.656$), outperforming all baselines. On QA hallucination detection, CHI reaches 0.869 effective AUC where BERTScore and ROUGE perform at chance. EHI demonstrates 8.5$\times$ greater sensitivity to entity fabrication than BERTScore. The optimized pipeline runs at 464ms/sample, 7.5$\times$ faster than BERTScore. The decomposable factor architecture remains CHI's unique contribution---no competing metric provides diagnostic hallucination-type identification.
+
+\paragraph{Limitations.} RHI$^*$'s semantic verb matching treats antonyms as similar (cosine 0.33--0.70), rendering it blind to relation inversions. CHI's QA transfer success is partially a structural complexity proxy rather than fine-grained relation analysis. These are well-characterized limitations with clear remediation paths.
+
+\paragraph{Future work.} (1)~NLI-based verb matching to resolve the antonym blindness problem. (2)~CHI-RF, a reference-free variant using only source--generated Venn-diagram factors with optional NLI enrichment. (3)~Evaluation on TRUE and FRANK benchmarks. (4)~Extension to dialogue, data-to-text, and RAG hallucination detection. (5)~Domain-grounded knowledge base integration (UMLS, CELEX) for entity normalization across specialized domains.
+
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

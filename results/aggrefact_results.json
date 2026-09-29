@@ -1,0 +1,159 @@
+{
+  "overall": {
+    "n": 500,
+    "n_consistent": 464,
+    "n_inconsistent": 36,
+    "errors": 0,
+    "metrics": {
+      "CHI": {
+        "roc_auc": 0.6569683908045978,
+        "balanced_acc": 0.6227250957854407,
+        "optimal_threshold": 0.0002758648180649645,
+        "point_biserial": 0.07767622451792278,
+        "point_biserial_p": 0.08271099391786778,
+        "spearman": 0.1405543997187173,
+        "spearman_p": 0.0016289100295630776,
+        "n_valid": 500
+      },
+      "EHI": {
+        "roc_auc": 0.6908824233716475,
+        "balanced_acc": 0.6657088122605364,
+        "optimal_threshold": 0.4177280078547262,
+        "point_biserial": 0.17761566495328102,
+        "point_biserial_p": 6.51153994095918e-05,
+        "spearman": 0.17092563629382485,
+        "spearman_p": 0.000122660296968145,
+        "n_valid": 500
+      },
+      "RHI*": {
+        "roc_auc": 0.6587045019157088,
+        "balanced_acc": 0.6317049808429118,
+        "optimal_threshold": 3.562592078432075e-06,
+        "point_biserial": 0.07432190132672606,
+        "point_biserial_p": 0.09690938205034179,
+        "spearman": 0.1421090496869044,
+        "spearman_p": 0.0014431201240344624,
+        "n_valid": 500
+      },
+      "QHI": {
+        "roc_auc": 0.5732459291187739,
+        "balanced_acc": 0.6041666666666667,
+        "optimal_threshold": 0.5261141741979486,
+        "point_biserial": 0.06014006803889753,
+        "point_biserial_p": 0.17939424352762665,
+        "spearman": 0.06708475999926639,
+        "spearman_p": 0.13413474623962246,
+        "n_valid": 500
+      },
+      "EHI_enhanced": {
+        "roc_auc": 0.6894157088122606,
+        "balanced_acc": 0.6746886973180077,
+        "optimal_threshold": 0.4162893416024607,
+        "point_biserial": 0.1712455503603355,
+        "point_biserial_p": 0.00011906472420578854,
+        "spearman": 0.16961386685214616,
+        "spearman_p": 0.00013849802036004064,
+        "n_valid": 500
+      },
+      "ROUGE-L": {
+        "roc_auc": 0.8077406609195403,
+        "balanced_acc": 0.7664032567049808,
+        "optimal_threshold": 0.17691407580762222,
+        "point_biserial": 0.24207831378385058,
+        "point_biserial_p": 4.224004424992226e-08,
+        "spearman": 0.27556065897002474,
+        "spearman_p": 3.655756712923268e-10,
+        "n_valid": 500
+      },
+      "BERTScore": {
+        "roc_auc": 0.7974736590038315,
+        "balanced_acc": 0.7484434865900383,
+        "optimal_threshold": 0.8530567526817322,
+        "point_biserial": 0.2857194879188673,
+        "point_biserial_p": 7.561936386816963e-11,
+        "spearman": 0.26636697512160856,
+        "spearman_p": 1.4404158634359325e-09,
+        "n_valid": 500
+      }
+    }
+  },
+  "per_subset": {
+    "SummEval-binarized": {
+      "n": 500,
+      "metrics": {
+        "CHI": {
+          "roc_auc": 0.6569683908045978,
+          "balanced_acc": 0.6227250957854407,
+          "optimal_threshold": 0.0002758648180649645,
+          "point_biserial": 0.07767622451792278,
+          "point_biserial_p": 0.08271099391786778,
+          "spearman": 0.1405543997187173,
+          "spearman_p": 0.0016289100295630776,
+          "n_valid": 500
+        },
+        "EHI": {
+          "roc_auc": 0.6908824233716475,
+          "balanced_acc": 0.6657088122605364,
+          "optimal_threshold": 0.4177280078547262,
+          "point_biserial": 0.17761566495328102,
+          "point_biserial_p": 6.51153994095918e-05,
+          "spearman": 0.17092563629382485,
+          "spearman_p": 0.000122660296968145,
+          "n_valid": 500
+        },
+        "RHI*": {
+          "roc_auc": 0.6587045019157088,
+          "balanced_acc": 0.6317049808429118,
+          "optimal_threshold": 3.562592078432075e-06,
+          "point_biserial": 0.07432190132672606,
+          "point_biserial_p": 0.09690938205034179,
+          "spearman": 0.1421090496869044,
+          "spearman_p": 0.0014431201240344624,
+          "n_valid": 500
+        },
+        "QHI": {
+          "roc_auc": 0.5732459291187739,
+          "balanced_acc": 0.6041666666666667,
+          "optimal_threshold": 0.5261141741979486,
+          "point_biserial": 0.06014006803889753,
+          "point_biserial_p": 0.17939424352762665,
+          "spearman": 0.06708475999926639,
+          "spearman_p": 0.13413474623962246,
+          "n_valid": 500
+        },
+        "EHI_enhanced": {
+          "roc_auc": 0.6894157088122606,
+          "balanced_acc": 0.6746886973180077,
+          "optimal_threshold": 0.4162893416024607,
+          "point_biserial": 0.1712455503603355,
+          "point_biserial_p": 0.00011906472420578854,
+          "spearman": 0.16961386685214616,
+          "spearman_p": 0.00013849802036004064,
+          "n_valid": 500
+        },
+        "ROUGE-L": {
+          "roc_auc": 0.8077406609195403,
+          "balanced_acc": 0.7664032567049808,
+          "optimal_threshold": 0.17691407580762222,
+          "point_biserial": 0.24207831378385058,
+          "point_biserial_p": 4.224004424992226e-08,
+          "spearman": 0.27556065897002474,
+          "spearman_p": 3.655756712923268e-10,
+          "n_valid": 500
+        },
+        "BERTScore": {
+          "roc_auc": 0.7974736590038315,
+          "balanced_acc": 0.7484434865900383,
+          "optimal_threshold": 0.8530567526817322,
+          "point_biserial": 0.2857194879188673,
+          "point_biserial_p": 7.561936386816963e-11,
+          "spearman": 0.26636697512160856,
+          "spearman_p": 1.4404158634359325e-09,
+          "n_valid": 500
+        }
+      }
+    }
+  },
+  "adaptation": "I=R (source document used as both Input and Reference)",
+  "note": "EHI PH factor ~0 when R=I since R\u2229G\u2212I = \u2205"
+}

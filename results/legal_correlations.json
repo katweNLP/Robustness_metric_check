@@ -1,0 +1,68 @@
+{
+  "ehi": {
+    "spearman_rho": 0.6562,
+    "kendall_tau": 0.4656,
+    "p_spearman": 0.0,
+    "p_kendall": 0.0
+  },
+  "rhi_star": {
+    "spearman_rho": 0.7217,
+    "kendall_tau": 0.5409,
+    "p_spearman": 0.0,
+    "p_kendall": 0.0
+  },
+  "qhi": {
+    "spearman_rho": 0.241,
+    "kendall_tau": 0.1718,
+    "p_spearman": 0.015718,
+    "p_kendall": 0.021151
+  },
+  "chi": {
+    "spearman_rho": 0.6732,
+    "kendall_tau": 0.4784,
+    "p_spearman": 0.0,
+    "p_kendall": 0.0
+  },
+  "rouge1": {
+    "spearman_rho": 0.7653,
+    "kendall_tau": 0.6072,
+    "p_spearman": 0.0,
+    "p_kendall": 0.0
+  },
+  "rouge2": {
+    "spearman_rho": 0.7609,
+    "kendall_tau": 0.6057,
+    "p_spearman": 0.0,
+    "p_kendall": 0.0
+  },
+  "rougeL": {
+    "spearman_rho": 0.7612,
+    "kendall_tau": 0.6072,
+    "p_spearman": 0.0,
+    "p_kendall": 0.0
+  },
+  "bertscore": {
+    "spearman_rho": 0.7449,
+    "kendall_tau": 0.6011,
+    "p_spearman": 0.0,
+    "p_kendall": 0.0
+  },
+  "entity_f1": {
+    "spearman_rho": -0.0419,
+    "kendall_tau": -0.04,
+    "p_spearman": 0.678815,
+    "p_kendall": 0.5573
+  },
+  "alignscore_proxy": {
+    "spearman_rho": 0.8547,
+    "kendall_tau": 0.6737,
+    "p_spearman": 0.0,
+    "p_kendall": 0.0
+  },
+  "summac_proxy": {
+    "spearman_rho": 0.098,
+    "kendall_tau": 0.0652,
+    "p_spearman": 0.332238,
+    "p_kendall": 0.337539
+  }
+}

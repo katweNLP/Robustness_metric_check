@@ -1,0 +1,294 @@
+{
+  "news": {
+    "domain": "news",
+    "n_articles": 20,
+    "n_models": 5,
+    "correlations": {
+      "ehi": {
+        "spearman_rho": 0.683,
+        "kendall_tau": 0.4893,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "rhi_star": {
+        "spearman_rho": 0.5069,
+        "kendall_tau": 0.3242,
+        "p_spearman": 0.0,
+        "p_kendall": 2e-06
+      },
+      "qhi": {
+        "spearman_rho": 0.4614,
+        "kendall_tau": 0.3332,
+        "p_spearman": 1e-06,
+        "p_kendall": 7e-06
+      },
+      "chi": {
+        "spearman_rho": 0.5629,
+        "kendall_tau": 0.3783,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "rouge1": {
+        "spearman_rho": 0.6782,
+        "kendall_tau": 0.5077,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "rouge2": {
+        "spearman_rho": 0.6508,
+        "kendall_tau": 0.4827,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "rougeL": {
+        "spearman_rho": 0.6927,
+        "kendall_tau": 0.5132,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "bertscore": {
+        "spearman_rho": 0.7479,
+        "kendall_tau": 0.597,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "entity_f1": {
+        "spearman_rho": -0.4993,
+        "kendall_tau": -0.3422,
+        "p_spearman": 0.0,
+        "p_kendall": 1e-06
+      },
+      "alignscore_proxy": {
+        "spearman_rho": 0.8805,
+        "kendall_tau": 0.7284,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "summac_proxy": {
+        "spearman_rho": 0.2768,
+        "kendall_tau": 0.2029,
+        "p_spearman": 0.005313,
+        "p_kendall": 0.002868
+      }
+    }
+  },
+  "medical": {
+    "domain": "medical",
+    "n_articles": 20,
+    "n_models": 5,
+    "correlations": {
+      "ehi": {
+        "spearman_rho": 0.61,
+        "kendall_tau": 0.4399,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "rhi_star": {
+        "spearman_rho": 0.734,
+        "kendall_tau": 0.5325,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "qhi": {
+        "spearman_rho": 0.535,
+        "kendall_tau": 0.3924,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "chi": {
+        "spearman_rho": 0.7011,
+        "kendall_tau": 0.5063,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "rouge1": {
+        "spearman_rho": 0.842,
+        "kendall_tau": 0.6855,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "rouge2": {
+        "spearman_rho": 0.8314,
+        "kendall_tau": 0.6681,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "rougeL": {
+        "spearman_rho": 0.8421,
+        "kendall_tau": 0.6848,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "bertscore": {
+        "spearman_rho": 0.8463,
+        "kendall_tau": 0.7224,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "entity_f1": {
+        "spearman_rho": 0.2437,
+        "kendall_tau": 0.1723,
+        "p_spearman": 0.014556,
+        "p_kendall": 0.013831
+      },
+      "alignscore_proxy": {
+        "spearman_rho": 0.7633,
+        "kendall_tau": 0.546,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "summac_proxy": {
+        "spearman_rho": 0.1861,
+        "kendall_tau": 0.1479,
+        "p_spearman": 0.063774,
+        "p_kendall": 0.029256
+      }
+    }
+  },
+  "legal": {
+    "domain": "legal",
+    "n_articles": 20,
+    "n_models": 5,
+    "correlations": {
+      "ehi": {
+        "spearman_rho": 0.6562,
+        "kendall_tau": 0.4656,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "rhi_star": {
+        "spearman_rho": 0.7217,
+        "kendall_tau": 0.5409,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "qhi": {
+        "spearman_rho": 0.241,
+        "kendall_tau": 0.1718,
+        "p_spearman": 0.015718,
+        "p_kendall": 0.021151
+      },
+      "chi": {
+        "spearman_rho": 0.6732,
+        "kendall_tau": 0.4784,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "rouge1": {
+        "spearman_rho": 0.7653,
+        "kendall_tau": 0.6072,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "rouge2": {
+        "spearman_rho": 0.7609,
+        "kendall_tau": 0.6057,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "rougeL": {
+        "spearman_rho": 0.7612,
+        "kendall_tau": 0.6072,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "bertscore": {
+        "spearman_rho": 0.7449,
+        "kendall_tau": 0.6011,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "entity_f1": {
+        "spearman_rho": -0.0419,
+        "kendall_tau": -0.04,
+        "p_spearman": 0.678815,
+        "p_kendall": 0.5573
+      },
+      "alignscore_proxy": {
+        "spearman_rho": 0.8547,
+        "kendall_tau": 0.6737,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "summac_proxy": {
+        "spearman_rho": 0.098,
+        "kendall_tau": 0.0652,
+        "p_spearman": 0.332238,
+        "p_kendall": 0.337539
+      }
+    }
+  },
+  "financial": {
+    "domain": "financial",
+    "n_articles": 20,
+    "n_models": 5,
+    "correlations": {
+      "ehi": {
+        "spearman_rho": 0.5145,
+        "kendall_tau": 0.3663,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "rhi_star": {
+        "spearman_rho": 0.5707,
+        "kendall_tau": 0.406,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "qhi": {
+        "spearman_rho": 0.2542,
+        "kendall_tau": 0.1805,
+        "p_spearman": 0.010711,
+        "p_kendall": 0.010914
+      },
+      "chi": {
+        "spearman_rho": 0.5407,
+        "kendall_tau": 0.3862,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "rouge1": {
+        "spearman_rho": 0.6761,
+        "kendall_tau": 0.5405,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "rouge2": {
+        "spearman_rho": 0.6669,
+        "kendall_tau": 0.5256,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "rougeL": {
+        "spearman_rho": 0.665,
+        "kendall_tau": 0.5213,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "bertscore": {
+        "spearman_rho": 0.659,
+        "kendall_tau": 0.5465,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "entity_f1": {
+        "spearman_rho": -0.1368,
+        "kendall_tau": -0.1076,
+        "p_spearman": 0.174838,
+        "p_kendall": 0.115004
+      },
+      "alignscore_proxy": {
+        "spearman_rho": 0.86,
+        "kendall_tau": 0.6709,
+        "p_spearman": 0.0,
+        "p_kendall": 0.0
+      },
+      "summac_proxy": {
+        "spearman_rho": 0.1316,
+        "kendall_tau": 0.0781,
+        "p_spearman": 0.191679,
+        "p_kendall": 0.250286
+      }
+    }
+  }
+}
