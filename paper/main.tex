@@ -12,6 +12,10 @@
 \usepackage{multirow}
 \usepackage[numbers,sort&compress]{natbib}
 
+\usepackage{amssymb}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
 \newcommand{\EHI}{\text{EHI}}
 \newcommand{\RHI}{\text{RHI}^*}
 \newcommand{\QHI}{\text{QHI}}
@@ -33,7 +37,7 @@ $^{2}$Salesforce India Pvt Ltd, Bengaluru, India\\
 \maketitle
 
 \begin{abstract}
-Hallucination metrics for natural language generation must demonstrate broad empirical validity to gain community acceptance. While several decomposable hallucination indices---the Entity Hallucination Index (EHI), Relation Hallucination Index (RHI$^*$), Quantity Hallucination Index (QHI), and their Composite Hallucination Index (CHI)---have shown promising theoretical grounding through softmax-normalized Venn-diagram factor decomposition, their evaluation has been limited to summarization benchmarks. We present a systematic evaluation across five dimensions critical for metric acceptance: (1) correlation with human judgments on SummEval (N=1,600) at both sample and system level, (2) binary factuality classification on binarized consistency annotations (N=500), (3) cross-task transfer to question-answering hallucination detection on HaluEval (N=500), (4) robustness under controlled entity-swap and relation-inversion perturbations, and (5) computational efficiency. We compare against seven baselines: ROUGE-1/2/L, BERTScore, BARTScore, MiniCheck, AlignScore, SummaC, and Entity~F1. Results show that CHI achieves the highest system-level correlation ($\rho=0.656$), outperforming all baselines including ROUGE-1 ($\rho=0.527$). On non-summarization QA, CHI achieves 0.869 effective AUC where BERTScore performs at chance (0.504). EHI shows the strongest sensitivity to entity-swap perturbations ($\Delta=-0.102$) while BERTScore is nearly blind ($\Delta=-0.012$). The optimized RHI$^*$ runs at 136ms per sample, making the full CHI pipeline practical for real-world deployment at 464ms. We release all code, results, and an interactive HTML dashboard.
+Hallucination metrics for natural language generation must demonstrate broad empirical validity to gain community acceptance. While several decomposable hallucination indices---the Entity Hallucination Index (EHI), Relation Hallucination Index (RHI$^*$), Quantity Hallucination Index (QHI), and their Composite Hallucination Index (CHI)---have shown promising theoretical grounding through softmax-normalized Venn-diagram factor decomposition, their evaluation has been limited to summarization benchmarks. We present a systematic evaluation across five dimensions critical for metric acceptance: (1) correlation with human judgments on SummEval (N=1,600) at both sample and system level, (2) binary factuality classification on binarized consistency annotations (N=500), (3) cross-task transfer to question-answering hallucination detection on HaluEval (N=500), (4) robustness under controlled entity-swap and relation-inversion perturbations, and (5) computational efficiency. We compare against seven baselines: ROUGE-1/2/L, BERTScore, BARTScore, MiniCheck, AlignScore, SummaC, and Entity~F1. Results show that CHI achieves the highest system-level correlation ($\rho=0.656$), outperforming all baselines including ROUGE-1 ($\rho=0.527$). On non-summarization QA, CHI achieves 0.869 effective AUC where BERTScore performs at chance (0.504). EHI shows the strongest sensitivity to entity-swap perturbations ($\Delta=-0.102$) while BERTScore is nearly blind ($\Delta=-0.012$). The optimized RHI$^*$ runs at 136ms per sample, making the full CHI pipeline practical for real-world deployment at 464ms. We release all code, results, and an interactive HTML dashboard at \url{https://github.com/katweNLP/Robustness_metric_check}.
 \end{abstract}
 
 \section{Introduction}
@@ -142,6 +146,47 @@ Entity F1 & NER overlap & spaCy (12M) & Yes (src+G) \\
 \multicolumn{4}{l}{\textsuperscript{$\dagger$}Proxy implementations using the same NLI cross-encoder.}
 \end{tabular}
 \end{table}
+
+\subsection{Comprehensive Metric Comparison}
+
+Table~\ref{tab:comparison} provides a multi-dimensional comparison of all metrics across properties critical for practical adoption.
+
+\begin{table*}[h]
+\centering
+\caption{Multi-dimensional comparison of all evaluated metrics. \cmark\ = yes, \xmark\ = no, $\sim$ = partial.}
+\label{tab:comparison}
+\small
+\begin{tabular}{l|cccc|ccc|cc}
+\toprule
+\textbf{Property} & \textbf{CHI} & \textbf{EHI} & \textbf{RHI$^*$} & \textbf{QHI} & \textbf{ROUGE} & \textbf{BERTScore} & \textbf{BARTScore} & \textbf{MiniCheck} & \textbf{Entity F1} \\
+\midrule
+Requires training & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark \\
+Requires neural model & $\sim$ & \xmark & \cmark & \xmark & \xmark & \cmark & \cmark & \cmark & \xmark \\
+Model size & 34M & 12M & 34M & 12M & 0 & 355M & 406M & 86M & 12M \\
+Reference-free capable & $\sim$ & $\sim$ & $\sim$ & $\sim$ & \xmark & \xmark & \cmark & \cmark & $\sim$ \\
+Deterministic & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark \\
+\midrule
+Decomposable & \cmark & \cmark & \cmark & \cmark & \xmark & \xmark & \xmark & $\sim$ & \xmark \\
+\# diagnostic factors & 16 & 5 & 6 & 5 & 0 & 0 & 0 & per-sent & 0 \\
+Hallucination typing & \cmark & \cmark & \cmark & \cmark & \xmark & \xmark & \xmark & \xmark & \xmark \\
+Entity-level detection & \cmark & \cmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & $\sim$ \\
+Relation-level detection & \cmark & \xmark & \cmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark \\
+Quantity-level detection & \cmark & \xmark & \xmark & \cmark & \xmark & \xmark & \xmark & \xmark & \xmark \\
+Polarity-aware & \xmark & n/a & \xmark & n/a & \xmark & \xmark & $\sim$ & \cmark & \xmark \\
+\midrule
+Speed (ms/sample) & 464 & 49 & 136 & 66 & 2 & 3,495 & $\sim$800 & $\sim$2,000 & $\sim$50 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+Key observations from Table~\ref{tab:comparison}:
+\begin{itemize}
+\item CHI is the only metric providing \textbf{three-level hallucination typing} (entity, relation, quantity) with 16 total diagnostic factors.
+\item RHI$^*$ uses sentence-transformers (22M) for semantic verb matching alongside spaCy (12M), totaling 34M---still 10$\times$ smaller than BERTScore and 12$\times$ smaller than BARTScore.
+\item \textbf{Reference-free capability} is marked ``$\sim$'' for CHI because it can operate with I=R (source as reference) with degraded PH factor, and a dedicated reference-free variant (CHI-RF) is under development.
+\item \textbf{Polarity awareness}---the ability to distinguish ``arrested'' from ``released''---is a gap for RHI$^*$ (Section~4.5). BARTScore has partial polarity awareness through generation probability (generating ``arrested'' vs ``released'' yields different log-probs), and MiniCheck inherits it from NLI.
+\item At 464ms/sample, CHI is 7.5$\times$ faster than BERTScore and provides diagnostic information that no faster metric offers.
+\end{itemize}
 
 
 \section{Results}
@@ -424,6 +469,8 @@ We present the first systematic evaluation of the CHI metric family across five 
 \paragraph{Strengths.} CHI achieves the highest system-level correlation on SummEval ($\rho=0.656$), outperforming all baselines. On QA hallucination detection, CHI reaches 0.869 effective AUC where BERTScore and ROUGE perform at chance. EHI demonstrates 8.5$\times$ greater sensitivity to entity fabrication than BERTScore. The optimized pipeline runs at 464ms/sample, 7.5$\times$ faster than BERTScore. The decomposable factor architecture remains CHI's unique contribution---no competing metric provides diagnostic hallucination-type identification.
 
 \paragraph{Limitations.} RHI$^*$'s semantic verb matching treats antonyms as similar (cosine 0.33--0.70), rendering it blind to relation inversions. CHI's QA transfer success is partially a structural complexity proxy rather than fine-grained relation analysis. These are well-characterized limitations with clear remediation paths.
+
+All code, experimental results, and the interactive HTML dashboard are available at \url{https://github.com/katweNLP/Robustness_metric_check}.
 
 \paragraph{Future work.} (1)~NLI-based verb matching to resolve the antonym blindness problem. (2)~CHI-RF, a reference-free variant using only source--generated Venn-diagram factors with optional NLI enrichment. (3)~Evaluation on TRUE and FRANK benchmarks. (4)~Extension to dialogue, data-to-text, and RAG hallucination detection. (5)~Domain-grounded knowledge base integration (UMLS, CELEX) for entity normalization across specialized domains.
 
