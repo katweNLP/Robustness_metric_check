@@ -53,6 +53,51 @@
       "max_ms": 4385.0,
       "category": "heavyweight",
       "n_runs": 10
+    },
+    "BARTScore": {
+      "mean_ms": 1604.11,
+      "std_ms": 90.43,
+      "median_ms": 1597.65,
+      "min_ms": 1420.66,
+      "max_ms": 1736.17,
+      "category": "heavyweight",
+      "n_runs": 10
+    },
+    "MiniCheck": {
+      "mean_ms": 3426.63,
+      "std_ms": 795.0,
+      "median_ms": 3329.35,
+      "min_ms": 1805.33,
+      "max_ms": 4601.2,
+      "category": "heavyweight",
+      "n_runs": 10
+    },
+    "AlignScore": {
+      "mean_ms": 441.82,
+      "std_ms": 148.47,
+      "median_ms": 436.17,
+      "min_ms": 189.83,
+      "max_ms": 752.5,
+      "category": "moderate",
+      "n_runs": 10
+    },
+    "SummaC": {
+      "mean_ms": 500.67,
+      "std_ms": 130.84,
+      "median_ms": 440.33,
+      "min_ms": 274.71,
+      "max_ms": 712.44,
+      "category": "moderate",
+      "n_runs": 10
+    },
+    "Entity F1": {
+      "mean_ms": 52.29,
+      "std_ms": 2.04,
+      "median_ms": 52.03,
+      "min_ms": 48.0,
+      "max_ms": 55.0,
+      "category": "lightweight",
+      "n_runs": 10
     }
   },
   "n_samples_available": 50,

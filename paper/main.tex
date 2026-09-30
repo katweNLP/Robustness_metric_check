@@ -174,7 +174,7 @@ Relation-level detection & \cmark & \xmark & \cmark & \xmark & \xmark & \xmark &
 Quantity-level detection & \cmark & \xmark & \xmark & \cmark & \xmark & \xmark & \xmark & \xmark & \xmark \\
 Polarity-aware & \xmark & n/a & \xmark & n/a & \xmark & \xmark & $\sim$ & \cmark & \xmark \\
 \midrule
-Speed (ms/sample) & 464 & 49 & 136 & 66 & 2 & 3,495 & $\sim$800 & $\sim$2,000 & $\sim$50 \\
+Speed (ms/sample) & 464 & 49 & 136 & 66 & 2 & 3,495 & 1,604 & 3,427 & 52 \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -417,15 +417,20 @@ supported $\leftrightarrow$ opposed & 0.327 & Passes \\
 \midrule
 ROUGE-L & 1.8 & 0.7 & Lightweight \\
 \textbf{EHI} & 48.8 & 1.0 & Lightweight \\
+Entity F1 & 52.3 & 4.6 & Lightweight \\
 \textbf{QHI} & 66.5 & 7.3 & Lightweight \\
 \textbf{RHI$^*$} & 135.6 & 10.9 & Moderate \\
+AlignScore & 441.8 & 57.2 & Moderate \\
 \textbf{CHI (full)} & 464.2 & 63.5 & Moderate \\
+SummaC & 500.7 & 41.3 & Moderate \\
+BARTScore & 1,604.1 & 137.8 & Heavyweight \\
+MiniCheck & 3,426.6 & 352.4 & Heavyweight \\
 BERTScore & 3,495.1 & 318.6 & Heavyweight \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-RHI$^*$ runs at 136ms per sample after batch encoding optimization (40$\times$ speedup over the naive implementation). The full CHI pipeline (464ms) is 7.5$\times$ faster than BERTScore (3,495ms), making it practical for evaluation of large output sets.
+The full benchmark across all 11 metrics reveals three tiers. \textbf{Lightweight} ($<$100ms): ROUGE-L (2ms), EHI (49ms), Entity~F1 (52ms), QHI (67ms). \textbf{Moderate} (100--1000ms): RHI$^*$ (136ms), AlignScore (442ms), CHI (464ms), SummaC (501ms). \textbf{Heavyweight} ($>$1s): BARTScore (1,604ms), MiniCheck (3,427ms), BERTScore (3,495ms). CHI is 7.5$\times$ faster than BERTScore and 3.5$\times$ faster than BARTScore while providing diagnostic decomposition that neither offers. RHI$^*$'s 136ms reflects a 40$\times$ speedup from batch verb encoding optimization.
 
 
 \section{Discussion}
