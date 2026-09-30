@@ -126,23 +126,36 @@ def _batch_encode_verbs(*tuple_sets: Set[tuple]) -> Dict[str, object]:
     return {verb: embeddings[i] for i, verb in enumerate(verb_list)}
 
 
+def _check_antonym(v1: str, v2: str, s1: str = "", o1: str = "") -> bool:
+    """Two-layer antonym check: WordNet lookup + NLI contradiction."""
+    try:
+        from .antonym_check import is_antonym_pair
+        return is_antonym_pair(v1, v2, use_nli=True, subject=s1 or None, obj=o1 or None)
+    except ImportError:
+        return False
+
+
 def _semantic_valid_cached(tup1: tuple, tup2: tuple, verb_embs: Dict[str, object]) -> bool:
-    """Check verb similarity using pre-computed embeddings."""
+    """Check verb similarity using pre-computed embeddings + antonym guard."""
     s1, v1, o1 = tup1[:3]
     s2, v2, o2 = tup2[:3]
     if s1.lower() == s2.lower() and v1.lower() == v2.lower() and o1.lower() == o2.lower():
         return True
+    if _check_antonym(v1, v2, s1, o1):
+        return False
     if v1 not in verb_embs or v2 not in verb_embs:
         return False
     return util.cos_sim(verb_embs[v1], verb_embs[v2]).item() > 0.3
 
 
 def _semantic_valid(tup1: tuple, tup2: tuple) -> bool:
-    """Check verb similarity via sentence-transformer (backward-compat wrapper)."""
+    """Check verb similarity via sentence-transformer + antonym guard."""
     s1, v1, o1 = tup1[:3]
     s2, v2, o2 = tup2[:3]
     if s1.lower() == s2.lower() and v1.lower() == v2.lower() and o1.lower() == o2.lower():
         return True
+    if _check_antonym(v1, v2, s1, o1):
+        return False
     model = _get_st_model()
     embs = model.encode([tup1[1], tup2[1]], convert_to_tensor=True)
     return util.cos_sim(embs[0], embs[1]).item() > 0.3
