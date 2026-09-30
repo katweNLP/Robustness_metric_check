@@ -124,11 +124,25 @@ def relations_to_tuples(relations: List[Dict]) -> Set[Tuple[str, str, str, str]]
     return tuples
 
 
+def _check_antonym_core(v1: str, v2: str, s1: str = "", o1: str = "") -> bool:
+    """Two-layer antonym check: WordNet + NLI contradiction."""
+    try:
+        from .antonym_check import is_antonym_pair
+        return is_antonym_pair(v1, v2, use_nli=True, subject=s1 or None, obj=o1 or None)
+    except ImportError:
+        return False
+
+
 def is_semantically_valid(tup1: tuple, tup2: tuple, threshold: float = 0.3) -> bool:
-    """Check verb semantic similarity using sentence-transformer embeddings."""
+    """Check verb semantic similarity with antonym guard."""
+    s1, v1, o1 = tup1[:3]
+    s2, v2, o2 = tup2[:3]
+    if s1.lower() == s2.lower() and v1.lower() == v2.lower() and o1.lower() == o2.lower():
+        return True
+    if _check_antonym_core(v1, v2, s1, o1):
+        return False
     model = _get_st_model()
-    verb1, verb2 = tup1[1], tup2[1]
-    embeddings = model.encode([verb1, verb2], convert_to_tensor=True)
+    embeddings = model.encode([v1, v2], convert_to_tensor=True)
     cosine_sim = util.cos_sim(embeddings[0], embeddings[1]).item()
     return cosine_sim > threshold
 

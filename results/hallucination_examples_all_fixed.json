@@ -1,0 +1,102 @@
+[
+  {
+    "name": "1. Faithful (extractive)",
+    "EHI": 0.456,
+    "RHI_linear": 0.514,
+    "RHI_star": 0.24,
+    "QHI": 0.466,
+    "CHI": 0.353,
+    "NH_linear": 0.0,
+    "NH_star": 0.0
+  },
+  {
+    "name": "2. Faithful (abstractive)",
+    "EHI": 0.298,
+    "RHI_linear": 0.553,
+    "RHI_star": 0.229,
+    "QHI": 0.298,
+    "CHI": 0.259,
+    "NH_linear": 1.0,
+    "NH_star": 1.0
+  },
+  {
+    "name": "3. Entity fabrication",
+    "EHI": 0.396,
+    "RHI_linear": 0.508,
+    "RHI_star": 0.237,
+    "QHI": 0.466,
+    "CHI": 0.338,
+    "NH_linear": 0.583,
+    "NH_star": 0.583
+  },
+  {
+    "name": "4. Entity omission",
+    "EHI": 0.4,
+    "RHI_linear": 0.407,
+    "RHI_star": 0.217,
+    "QHI": 0.298,
+    "CHI": 0.217,
+    "NH_linear": 0.5,
+    "NH_star": 0.5
+  },
+  {
+    "name": "5. Rel. fabrication",
+    "EHI": 0.435,
+    "RHI_linear": 0.394,
+    "RHI_star": 0.203,
+    "QHI": 0.466,
+    "CHI": 0.32,
+    "NH_linear": 1.0,
+    "NH_star": 1.0
+  },
+  {
+    "name": "6. Rel. inv. (cancelled)",
+    "EHI": 0.416,
+    "RHI_linear": 0.449,
+    "RHI_star": 0.212,
+    "QHI": 0.466,
+    "CHI": 0.324,
+    "NH_linear": 1.0,
+    "NH_star": 1.0
+  },
+  {
+    "name": "7. Quantity fabrication",
+    "EHI": 0.391,
+    "RHI_linear": 0.903,
+    "RHI_star": 0.406,
+    "QHI": 0.271,
+    "CHI": 0.345,
+    "NH_linear": 0.042,
+    "NH_star": 0.042
+  },
+  {
+    "name": "8. Quantity omission",
+    "EHI": 0.436,
+    "RHI_linear": 0.903,
+    "RHI_star": 0.406,
+    "QHI": 0.298,
+    "CHI": 0.42,
+    "NH_linear": 0.042,
+    "NH_star": 0.042
+  },
+  {
+    "name": "9. Rel. inv. (denied)",
+    "EHI": 0.435,
+    "RHI_linear": 0.394,
+    "RHI_star": 0.203,
+    "QHI": 0.466,
+    "CHI": 0.32,
+    "NH_linear": 1.0,
+    "NH_star": 1.0
+  },
+  {
+    "name": "10. All hallucinated",
+    "EHI": 0.298,
+    "RHI_linear": 0.553,
+    "RHI_star": 0.229,
+    "QHI": 0.255,
+    "CHI": 0.258,
+    "NH_linear": 1.0,
+    "NH_star": 1.0
+  }
+]
